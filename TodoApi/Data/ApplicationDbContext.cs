@@ -8,6 +8,6 @@ namespace TodoApi.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<TodoTask> Tasks { get; set; }
+        public virtual DbSet<TodoTask> Tasks { get; set; }
     }
 }
