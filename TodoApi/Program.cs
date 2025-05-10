@@ -86,6 +86,18 @@ public class Program
             };
         });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("client", policy =>
+            {
+                policy
+                    .WithOrigins("http://localhost:5173")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -96,6 +108,7 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseCors("client");
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

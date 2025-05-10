@@ -1,6 +1,10 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <h1>
+      Todo App is a simple and secure task management web application. Users can register, log in,
+      create tasks, mark them as completed, and delete them. All data is stored on the server and
+      protected using JWT authentication.
+    </h1>
   </div>
 </template>
 
