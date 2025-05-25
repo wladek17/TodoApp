@@ -1,86 +1,28 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
-import HelloWorld from "./components/HelloWorld.vue";
+import { RouterView, RouterLink } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/tasks">My Tasks</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+  <div class="min-h-screen bg-gray-50 flex flex-col">
+    <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
+      <RouterLink to="/" class="text-xl font-bold text-blue-600">TodoApp</RouterLink>
+      <nav class="space-x-4">
+        <RouterLink to="/" class="hover:underline">Home</RouterLink>
+        <RouterLink to="/tasks" class="hover:underline">Tasks</RouterLink>
+        <RouterLink to="/about" class="hover:underline">About</RouterLink>
+        <span v-if="auth.token" class="text-gray-500">| {{ auth.userEmail }}</span>
       </nav>
-    </div>
-  </header>
+    </header>
 
-  <RouterView />
+    <main class="flex-1 p-6">
+      <RouterView />
+    </main>
+
+    <footer class="bg-gray-100 text-center text-gray-500 py-4">
+      &copy; {{ new Date().getFullYear() }} TodoApp
+    </footer>
+  </div>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
