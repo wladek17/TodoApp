@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { ensureE2EUserExists } from "./setup";
 
 test.beforeEach(async ({ page }) => {
+  await ensureE2EUserExists();
+
   await page.goto("/login");
   await page.fill('input[placeholder="Email"]', "e2e@example.com");
   await page.fill('input[placeholder="Password"]', "_f0Z3$3{bBw*");

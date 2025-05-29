@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { ensureE2EUserExists } from "./setup";
+
+test.beforeEach(async () => {
+  await ensureE2EUserExists();
+});
 
 test("user can log in", async ({ page }) => {
   await page.goto("http://localhost:5173/login");
