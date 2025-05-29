@@ -32,6 +32,7 @@ It supports user authentication with JWT, task CRUD operations, and includes uni
 
 ### Backend (.NET 8 WebAPI)
 ```bash
+cd TodoApi
 dotnet restore
 dotnet ef database update
 dotnet run
