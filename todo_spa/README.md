@@ -1,64 +1,99 @@
-# todo_spa
+# Todo App
 
-This template should help get you started developing with Vue 3 in Vite.
+Todo App built with **Vue 3 + TypeScript** and **.NET 8 WebAPI**.  
+It supports user authentication with JWT, task CRUD operations, and includes unit and e2e tests using **Vitest**, **xUnit**, and **Playwright**.
 
-## Recommended IDE Setup
+---
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Tech Stack
 
-## Type Support for `.vue` Imports in TS
+### Frontend
+- **Vue 3** + **TypeScript** + **Vite**
+- **Pinia** for state management
+- **Vue Router**
+- **Axios**
+- **Tailwind CSS**
+- **Vitest** for unit tests
+- **Playwright** for end-to-end tests
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+### Backend
+- **.NET 8 WebAPI**
+- **SQLite** as the database
+- **Entity Framework Core**
+- **.NET Identity** for user management
+- **JWT (JSON Web Token)** authentication
+- **xUnit** + **FluentAssertions**
+- **Unit/Integration/E2E tests**
+- **Swagger** with JWT support
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+---
 
 ## Project Setup
 
-```sh
-npm install
+### Backend (.NET 8 WebAPI)
+```bash
+dotnet restore
+dotnet ef database update
+dotnet run
+```
+The API will be available at `https://localhost:7262/swagger/index.html`
+
+### Frontend (Vue 3)
+```bash
+cd todo_spa
+yarn install
+yarn dev
+```
+The frontend will run at `http://localhost:5173`
+
+---
+
+## Testing
+
+### Frontend Tests
+
+#### E2E Tests (Playwright)
+
+Make sure both the **backend** and **frontend** are running before running e2e tests.
+
+Install Playwright Browsers:
+```bash
+yarn playwright install
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
+Run E2E Tests:
+```bash
+yarn test:e2e
 ```
 
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
+Open Last HTML Report:
+```bash
+yarn playwright show-report
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
+#### Run Unit Tests:
+```bash
+yarn test:unit
 ```
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
+---
 
-```sh
-# Install browsers for the first run
-npx playwright install
+### Backend Tests
 
-# When testing on CI, must build the project first
-npm run build
-
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
+#### Unit Tests
+```bash
+cd TodoApi.Tests
+dotnet test --filter FullyQualifiedName~UnitTests
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+#### Integration Tests
+```bash
+cd TodoApi.Tests
+dotnet test --filter FullyQualifiedName~IntegrationTests
+```
 
-```sh
-npm run lint
+#### E2E Tests
+```bash
+cd TodoApi.Tests
+dotnet test --filter FullyQualifiedName~E2E
 ```
