@@ -1,40 +1,53 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 using TodoApi.Controllers;
 using TodoApi.Data;
 using TodoApi.Models;
-using FluentAssertions;
+using TodoApi.Tests.E2E;
 
 namespace TodoApi.Tests.IntegrationTests
 {
-    public class TasksControllerIntegrationTests
+    public class TasksControllerIntegrationTestsMySql : IClassFixture<CustomWebApplicationFactory>
     {
-        private TasksController CreateTasksControllerWithUser(ApplicationDbContext context, string userId)
-        {
-            var controller = new TasksController(context);
+        private readonly ApplicationDbContext _dbContext;
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        public TasksControllerIntegrationTestsMySql(CustomWebApplicationFactory factory)
+        {
+            var scope = factory.Services.CreateScope();
+            _dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        }
+
+        private TasksController CreateTasksControllerWithUser(string userId)
+        {
+            if (!_dbContext.Users.Any(u => u.Id == userId))
+            {
+                var user = new User
+                {
+                    Id = userId,
+                    UserName = $"testuser_{userId}"
+                };
+
+                _dbContext.Users.Add(user);
+                _dbContext.SaveChanges();
+            }
+
+            var controller = new TasksController(_dbContext);
+
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId)
             }));
 
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { User = user }
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
             };
 
             return controller;
-        }
-
-        private ApplicationDbContext CreateInMemoryDbContext()
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-
-            return new ApplicationDbContext(options);
         }
 
         [Fact]
@@ -42,8 +55,7 @@ namespace TodoApi.Tests.IntegrationTests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var context = CreateInMemoryDbContext();
-            var controller = CreateTasksControllerWithUser(context, userId);
+            var controller = CreateTasksControllerWithUser(userId);
 
             var task = new TodoTask
             {
@@ -77,8 +89,7 @@ namespace TodoApi.Tests.IntegrationTests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var context = CreateInMemoryDbContext();
-            var controller = CreateTasksControllerWithUser(context, userId);
+            var controller = CreateTasksControllerWithUser(userId);
 
             var task = new TodoTask
             {
@@ -112,8 +123,7 @@ namespace TodoApi.Tests.IntegrationTests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var context = CreateInMemoryDbContext();
-            var controller = CreateTasksControllerWithUser(context, userId);
+            var controller = CreateTasksControllerWithUser(userId);
 
             var task = new TodoTask
             {
@@ -139,8 +149,7 @@ namespace TodoApi.Tests.IntegrationTests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var context = CreateInMemoryDbContext();
-            var controller = CreateTasksControllerWithUser(context, userId);
+            var controller = CreateTasksControllerWithUser(userId);
 
             var updatedTask = new TodoTask
             {
@@ -160,17 +169,19 @@ namespace TodoApi.Tests.IntegrationTests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var context = CreateInMemoryDbContext();
-            var controller = CreateTasksControllerWithUser(context, userId);
+            var controller = CreateTasksControllerWithUser(userId);
 
-            context.Tasks.Add(new TodoTask
+            var task = new TodoTask
             {
-                Id = 1,
                 Title = "Original Title",
                 IsCompleted = false,
                 UserId = userId
-            });
-            await context.SaveChangesAsync();
+            };
+
+            _dbContext.Tasks.Add(task);
+            await _dbContext.SaveChangesAsync();
+
+            var createdTaskId = task.Id;
 
             var updatedTask = new TodoTask
             {
@@ -179,12 +190,12 @@ namespace TodoApi.Tests.IntegrationTests
             };
 
             // Act
-            var result = await controller.UpdateTask(1, updatedTask);
+            var result = await controller.UpdateTask(createdTaskId, updatedTask);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
 
-            var taskInDb = await context.Tasks.FirstOrDefaultAsync(t => t.Id == 1 && t.UserId == userId);
+            var taskInDb = await _dbContext.Tasks.FirstOrDefaultAsync(t => t.Id == createdTaskId && t.UserId == userId);
 
             taskInDb.Should().NotBeNull();
             taskInDb.Title.Should().Be("Updated Title");
@@ -196,8 +207,7 @@ namespace TodoApi.Tests.IntegrationTests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var context = CreateInMemoryDbContext();
-            var controller = CreateTasksControllerWithUser(context, userId);
+            var controller = CreateTasksControllerWithUser(userId);
 
             // Act
             var result = await controller.DeleteTask(1);
@@ -211,25 +221,27 @@ namespace TodoApi.Tests.IntegrationTests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var context = CreateInMemoryDbContext();
-            var controller = CreateTasksControllerWithUser(context, userId);
+            var controller = CreateTasksControllerWithUser(userId);
 
-            context.Tasks.Add(new TodoTask
+            var task = new TodoTask
             {
-                Id = 1,
                 Title = "Task to delete",
                 IsCompleted = false,
                 UserId = userId
-            });
-            await context.SaveChangesAsync();
+            };
+
+            _dbContext.Tasks.Add(task);
+            await _dbContext.SaveChangesAsync();
+
+            var createdTaskId = task.Id;
 
             // Act
-            var result = await controller.DeleteTask(1);
+            var result = await controller.DeleteTask(createdTaskId);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
 
-            var taskInDb = await context.Tasks.FirstOrDefaultAsync(t => t.Id == 1 && t.UserId == userId);
+            var taskInDb = await _dbContext.Tasks.FirstOrDefaultAsync(t => t.Id == createdTaskId && t.UserId == userId);
             taskInDb.Should().BeNull();
         }
     }

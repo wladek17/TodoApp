@@ -18,8 +18,8 @@ It supports user authentication with JWT, task CRUD operations, and includes uni
 
 ### Backend
 - **.NET 8 WebAPI**
-- **SQLite** as the database
-- **Entity Framework Core**
+- **MySQL** as the database (via Docker Compose)
+- **Entity Framework Core** with **Pomelo.EntityFrameworkCore.MySql**
 - **.NET Identity** for user management
 - **JWT (JSON Web Token)** authentication
 - **xUnit** + **FluentAssertions**
@@ -29,6 +29,22 @@ It supports user authentication with JWT, task CRUD operations, and includes uni
 ---
 
 ## Project Setup
+
+### Database (MySQL with Docker Compose)
+Make sure Docker is installed. Start MySQL containers:
+
+```bash
+docker compose up -d
+```
+
+This starts two databases:
+mysql_main (port 3307) — for development
+mysql_test (port 3308) — for tests
+
+Stop containers:
+```bash
+docker compose down
+```
 
 ### Backend (.NET 8 WebAPI)
 ```bash
@@ -79,6 +95,12 @@ yarn test:unit
 ---
 
 ### Backend Tests
+
+Make sure mysql_test container is running before executing backend tests:
+
+```bash
+docker compose up -d mysql_test
+```
 
 #### Unit Tests
 ```bash

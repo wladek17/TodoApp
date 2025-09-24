@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  mysql_main:
+    image: mysql:8
+    container_name: mysql_main
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Password123!
+      MYSQL_DATABASE: todo
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_main_data:/var/lib/mysql
+
+  mysql_test:
+    image: mysql:8
+    container_name: mysql_test
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Password123!
+      MYSQL_DATABASE: todo_test
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_test_data:/var/lib/mysql
+
+volumes:
+  mysql_main_data:
+  mysql_test_data:

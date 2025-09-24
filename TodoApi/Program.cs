@@ -19,15 +19,8 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        // added sql lite
-        if (builder.Environment.IsEnvironment("Testing"))
-        {
-            // For testing, the database will be overridden in CustomWebApplicationFactory
-        }
-        else
-        {
-            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite("Data Source=todo.db"));
-        }
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         // added identity
         builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
