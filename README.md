@@ -63,6 +63,27 @@ yarn dev
 ```
 The frontend will run at `http://localhost:5173`
 
+
+### Run with Docker
+Make sure Docker is installed.
+
+Start all services (backend, frontend, MySQL main & test):
+```bash
+docker compose up --build
+```
+
+Backend (ASP.NET Core WebAPI + Swagger): https://localhost:7262/
+Frontend (Vue 3 + Vite): http://localhost:5173/
+
+Two MySQL databases run in containers:
+mysql_main -> todo (main DB, port 3307)
+mysql_test -> todo_test (test DB, port 3308)
+
+Stop and remove containers:
+```bash
+docker compose down
+```
+
 ---
 
 ## Testing
