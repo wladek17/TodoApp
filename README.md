@@ -38,8 +38,8 @@ docker compose up -d
 ```
 
 This starts two databases:
-mysql_main (port 3307) — for development
-mysql_test (port 3308) — for tests
+mysql_main (port 3307) ï¿½ for development
+mysql_test (port 3308) ï¿½ for tests
 
 Stop containers:
 ```bash
@@ -141,3 +141,5 @@ dotnet test --filter FullyQualifiedName~IntegrationTests
 cd TodoApi.Tests
 dotnet test --filter FullyQualifiedName~E2E
 ```
+
+Test GitHub Actions workflow
