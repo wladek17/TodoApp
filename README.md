@@ -38,8 +38,8 @@ docker compose up -d
 ```
 
 This starts two databases:
-mysql_main (port 3307) � for development
-mysql_test (port 3308) � for tests
+mysql_main (port 3307) - for development
+mysql_test (port 3308) - for tests
 
 Stop containers:
 ```bash
