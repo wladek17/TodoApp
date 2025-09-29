@@ -130,5 +130,6 @@ public class Program
         app.MapControllers();
 
         app.Run();
+        Console.WriteLine($"Connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
     }
 }
