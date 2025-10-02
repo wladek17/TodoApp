@@ -1,0 +1,100 @@
+name: Main Branch Tests
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_URL: http://localhost:7262/api
+      ASPNETCORE_ENVIRONMENT: Testing
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: Password123!
+          MYSQL_DATABASE: todo_test
+          DOTNET_ROLL_FORWARD: Disable
+        ports:
+          - 3308:3306
+        options: >-
+            --health-cmd="mysqladmin ping -h localhost -uroot -pPassword123!"
+            --health-interval=10s
+            --health-timeout=5s
+            --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Add dotnet tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            nc -z 127.0.0.1 3308 && echo "MySQL is up" && break
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Debug ports
+        run: netstat -tln
+
+      - name: Apply EF Core migrations
+        run: |
+          cd TodoApi
+          dotnet ef database update --project TodoApi.csproj --startup-project TodoApi.csproj
+
+      - name: Run Backend Unit Tests
+        run: dotnet test ./TodoApi.Tests --filter FullyQualifiedName~UnitTests --verbosity normal
+
+      - name: Run Backend Integration Tests
+        run: dotnet test ./TodoApi.Tests --filter FullyQualifiedName~IntegrationTests --verbosity normal
+
+      - name: Run Backend E2E Tests
+        run: dotnet test ./TodoApi.Tests --filter FullyQualifiedName~E2E --verbosity normal
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd todo_spa
+          yarn install
+
+      - name: Run Frontend Unit Tests
+        run: |
+          cd todo_spa
+          yarn test:unit
+
+      - name: Start Backend
+        run: |
+          cd TodoApi
+          ASPNETCORE_ENVIRONMENT=Testing dotnet run --no-launch-profile --urls "http://localhost:7262" &
+          sleep 30
+
+      - name: Install Playwright
+        run: |
+          cd todo_spa
+          yarn playwright install --with-deps
+
+      - name: Run Frontend E2E Tests
+        run: |
+          cd todo_spa
+          VITE_API_URL=http://localhost:7262/api yarn test:e2e
