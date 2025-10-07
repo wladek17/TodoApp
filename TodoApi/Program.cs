@@ -127,6 +127,8 @@ public class Program
         app.UseCors("client");
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
         app.MapControllers();
 
         app.Run();
