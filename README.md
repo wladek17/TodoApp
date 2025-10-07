@@ -64,7 +64,7 @@ yarn dev
 The frontend will run at `http://localhost:5173`
 
 
-### Run with Docker
+### Run with Docker (Development)
 Make sure Docker is installed.
 
 Start all services (backend, frontend, MySQL main & test):
@@ -85,6 +85,101 @@ docker compose down
 ```
 
 ---
+
+### Production Build (Docker + GHCR)
+Production image is built via GitHub Actions and published to GitHub Container Registry (GHCR).
+
+Build and Run Locally:
+```bash
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+Or pull from GHCR:
+```bash
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+Backend + Frontend will run at `http://localhost:8080`
+Database (MySQL): port 3310
+
+### Docker Compose (Production):
+
+docker-compose.prod.yml example:
+```bash
+services:
+  todoapp:
+    image: ghcr.io/wladek17/todoapp:prod
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=server=db;port=3306;database=todo;user=root;password=Password123!
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=Password123!
+      - MYSQL_DATABASE=todo
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+
+```
+
+---
+
+### CI/CD (GitHub Actions)
+- Pull Request to dev branch: runs unit tests
+- Push to dev branch: runs unit + integration + e2e tests
+- Push to master branch: runs unit + integration + e2e tests, builds and pushes production Docker image -> ghcr.io/wladek17/todoapp:prod
+- Deploys frontend to GitHub Pages -> https://wladek17.github.io/TodoApp/
+
+### Useful Docker Commands
+Start containers
+```bash
+docker compose up -d
+```
+
+Restart containers
+```bash
+docker compose restart
+```
+
+Stop containers
+```bash
+docker compose down
+```
+
+View logs
+```bash
+docker logs todoapp
+```
+
+Rebuild containers (after code changes)
+```bash
+docker compose up -d --build
+```
+
+Pull latest production image from GHCR
+```bash
+docker pull ghcr.io/wladek17/todoapp:prod
+```
+
+Build production image manually
+```bash
+docker build -t todoapp:prod -f Dockerfile.prod .
+```
+
+Push production image to GHCR
+```bash
+docker push ghcr.io/wladek17/todoapp:prod
+```
 
 ## Testing
 
@@ -141,5 +236,3 @@ dotnet test --filter FullyQualifiedName~IntegrationTests
 cd TodoApi.Tests
 dotnet test --filter FullyQualifiedName~E2E
 ```
-
-Test GitHub Actions workflow 1
