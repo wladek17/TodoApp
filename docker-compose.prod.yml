@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  todoapp:
+    image: ghcr.io/wladek17/todoapp:prod
+    container_name: todoapp
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=server=db;port=3306;database=todo;user=root;password=Password123!
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    container_name: todoapp_db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=Password123!
+      - MYSQL_DATABASE=todo
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data:
